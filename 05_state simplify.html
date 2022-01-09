@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        class Weather extends React.Component{
+            //省略构造方法
+            // constructor(props) {
+            //     super(props);
+            //     this.state = {isHot:false};
+
+            //     //解决changeWeather中this的指向问题
+            //     this.changeWeather = this.changeWeather.bind(this);
+            // }
+
+            state = {isHot:false}
+
+            render() {
+                console.log(this);
+                const {isHot} = this.state;
+                return (
+                    <div>
+                        <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '寒冷'}</h1>   
+                    </div>
+                );
+            }
+            //自定义方法-使用箭头函数
+            //箭头函数中的this会往外部去指向this
+            changeWeather = () => {
+                const isHot = this.state.isHot;
+                this.setState({isHot: !isHot});
+            }
+        }
+
+        ReactDOM.render(
+            <Weather name="Taylor"/>,
+            document.getElementById('app')
+        );
+
+        
+    </script>
+</body>
+</html>

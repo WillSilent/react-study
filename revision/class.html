@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script type="text/javascript">
+        /*
+            总结：
+                1.类中的构造器不是必须写的，要对实例进行一些初始化操作，如添加指定属性时才写
+                2.如果A类继承了B类，且A类中写了构造器，那么A类构造器中的Super是必须要调用的
+                3.类中所定义的方法，都是放在了类的原型对象上，供实例去使用
+        */
+
+
+        class Person{
+            //构造器--只能有一个构造器
+            constructor(name, age) {
+                //构造器中的this是类的实例对象
+                this.name = name;
+                this.age = age;
+            }
+            
+            //一般方法
+            say() {
+                //say方法放在了Perosn类的原型对象上，供实例对象使用
+                //通过Person实例调用say时，say中的this就是实例对象
+                console.log(`my name is ${this.name}, I am ${this.age} years old.`);
+            }
+
+        }
+
+        const p1 = new Person('tom', 18)
+
+        console.log(p1);
+        p1.say();
+        //p1.say.call({a:1, b:2}) //这个调用改变了p1中this的指向
+
+        //继承
+        class Student extends Person{
+            constructor(name, age, grade) {
+                super(name, age);
+                this.grade = grade;
+            }
+
+            //重写父类方法
+            say() {
+                console.log(`my name is ${this.name}, I am ${this.age} years old, ${this.grade} student`);
+            }
+
+            study() {
+                console.log(`I am studying hard.`);
+            }
+        }
+
+        const s1 = new Student('Will', 18, 'fishman');
+        s1.say();
+        s1.study();
+
+
+        class Car {
+            // constructor(name, age) {
+            //     this.name = name
+            //     this.age = age
+            // }
+            
+            //类中可以直接写赋值语句，给实例对象添加了一个属性，名为wheel，值为4（感觉有点类似是类的静态变量）
+            wheel = 4
+
+            run = () => {
+                
+            }
+        }
+
+        const c1 = new Car();
+        console.log(c1);
+    </script>
+</body>
+</html>

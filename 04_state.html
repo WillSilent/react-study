@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        class Weather extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {isHot:false};
+
+                //解决changeWeather中this的指向问题
+                this.changeWeather = this.changeWeather.bind(this);
+            }
+
+            render() {
+                console.log(this);
+                const {isHot} = this.state;
+                return (
+                    <div>
+                        <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '寒冷'}</h1>   
+                    </div>
+                );
+            }
+
+            changeWeather() {
+                //changeWeather放在Weather的原型对象上，供对象使用
+                //由于changeWeather是作为onClick的回调，不是通过实例调用，而是直接调用
+                //再加上类中的方法默认开启了局部的严格模式，所以此函数中的this为undefined
+                //console.log(this); //undefined
+                //解决this的指向问题，在构造器中把类原型上的changeWeather绑定到实例对象的this上
+                
+                //获取isHot的值
+                const isHot = this.state.isHot;
+                //this.state.isHot = !isHot; //Error: state不可直接更改
+                this.setState({isHot: !isHot}); //state必须通过setState进行更新
+            }
+        }
+
+        ReactDOM.render(
+            <Weather name="Taylor"/>,
+            document.getElementById('app')
+        );
+
+        
+    </script>
+</body>
+</html>
