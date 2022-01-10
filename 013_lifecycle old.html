@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeCycle - old</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+        <hr/>
+        <div id="test2"></div>
+        <hr/>
+        <div id="test3"></div>
+    </div>
+
+    <script type="text/babel">
+
+
+        class Clock extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {date: new Date()};
+            }
+
+            //元素挂载到后开始执行
+            componentDidMount() {
+                this.timerID = setInterval(
+                    this.tick,
+                    1000
+                );
+            }
+
+            //元素将要被卸载
+            componentWillUnmount() {
+                clearInterval(this.timerID);
+            }
+
+            tick = ()=> {
+                this.setState({
+                    date: new Date()
+                });
+            }
+
+            //初始化渲染、状态更新之后
+            render() {
+                return (
+                    <div>
+                        <div>
+                            <h1>Hello, world!</h1>
+                            <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+                        </div>
+                    </div>
+                );
+            }
+        }
+        ReactDOM.render(
+            <Clock/>, document.getElementById('test1')
+        );
+        //----------------------------------------------
+        class Count extends React.Component {
+
+            constructor(props) {
+                console.log('Count --- constructor');
+                super(props);
+                this.state = {count: 0}
+            }
+
+            add = () =>{
+                const {count} = this.state;
+                this.setState({count: count+1})
+            }
+
+            //卸载组件按钮的回调
+            death = () =>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('test2'));
+            }
+
+            force = ()=>{
+                this.forceUpdate();
+            }
+
+            //组件将要挂载
+            componentWillMount() {
+                console.log('Count --- componentWillMount');
+            }
+
+            //控制组件是否进行更新的阀门 --- 返回true则继续走生命周期钩子函数，false则停止了
+            shouldComponentUpdate() {
+                console.log('Count --- shouldComponentUpdate');
+                return true;
+            }
+
+            //组将将要更新了
+            componentWillUpdate() {
+                console.log('Count --- componentWillUpdate');
+            }
+
+            //组件渲染
+            render() {
+                console.log('Count --- render');
+                const {count} = this.state;
+                return (
+                    <div>
+                        <h2>当前求和为: {count} </h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                        <button onClick={this.force}>不更新状态数据强制更新</button>    
+                    </div>
+                );
+            }
+
+            //组件完成挂载
+            componentDidMount() {
+                console.log('Count --- componentDidUnmount');
+            }
+
+            //组件完成更新
+            componentDidUpdate() {
+                console.log('Count --- componentDidUpdate');
+            }
+
+            //组件将要挂载的钩子
+            componentWillUnmount() {
+                console.log('Count --- componentWillUnmount');
+            }
+        }
+        ReactDOM.render(
+            <Count/>, document.getElementById('test2')
+        );
+        
+        //----------------------------------------------
+        //父组件A
+        class A extends React.Component{
+
+            state = {carName:'奔驰'}
+            
+            changeCar = ()=>{
+                this.setState({carName:'BMW'});
+            }
+
+            render() {
+                return(
+                    <div>
+                        <div>我是A组件</div>
+                        <button onClick={this.changeCar}>换车</button>
+                        <B carName={this.state.carName} />
+                    </div>
+                );
+            }
+        }
+
+        //子组件B
+        class B extends React.Component{
+            //第一次接收props时不会钩子函数不会调用
+            //只有当父组件进行更新时，子组件会重新接收props，则子组件中的该钩子函数会被调用
+            componentWillReceiveProps() {
+                console.log('B --- componentWillReceiveProps');
+            }
+
+            render() {
+                return(
+                    <div>我是B组件，父组件中的数据为:{this.props.carName}</div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <A/>, document.getElementById('test3')
+        );
+    </script>
+</body>
+</html>

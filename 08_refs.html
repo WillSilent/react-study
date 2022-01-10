@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refs</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+        <div id="test2"></div>
+        <div id="test3"></div>
+    </div>
+
+    <script type="text/babel">
+        //字符串形式的Refs
+        class Demo1 extends React.Component{
+
+            showData = ()=>{
+                const {input1} = this.refs;
+                alert(input1.value);
+            }
+
+            showI2Data = ()=>{
+                const {input2} = this.refs;
+                alert(input2.value);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <input ref="input1" type="text" placeholder="点击按钮提示数据" />&nbsp;
+                        <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                        <input ref="input2" onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <Demo1/>,
+            document.getElementById('test1')
+        );
+
+        //回调形式的Refs => 往实例自身上挂载
+        //回调ref中回调执行次数的问题=>
+        class Demo2 extends React.Component{
+
+            showData = ()=>{
+                const {input1} = this;
+                alert(input1.value);
+            }
+
+            showI2Data = ()=>{
+                const {input2, input3} = this;
+                alert(input2.value)
+            }
+
+            savaInput3 = (currentNode) =>{
+                this.input3 = currentNode;
+            }
+
+            render() {
+                return (
+                    <div>
+                        {
+                            /*
+                                以内联函数的形式定义回调ref
+                                    ref={currentNode => this.input1 = currentNode}
+                                每次页面更新重绘时时，这个回调函数会被调用两次，第一次传入的参数null，第二次传入的参数为DOM元素
+                            */
+                        }
+                        <input ref={currentNode => this.input1 = currentNode} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                        
+                        {
+                            /*
+                                以class的绑定函数的方式来定义回调ref
+                                    ref={this.savaInput3}
+                                可以解决上述出现的被执行两次
+                            */
+                        }
+                        <input ref={this.savaInput3} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                        <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                        <input ref={currentNode => this.input2 = currentNode} onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <Demo2/>,document.getElementById('test2')
+        );
+
+        //createRef形式的ref
+        class Demo3 extends React.Component{
+            /*
+                React.createRef调用后可以返回一个容器，
+                该容器可以存储ref所标识的节点，该容器时“专人专用”，每个ref都有自己的容器
+            */
+            myRef = React.createRef();
+            myRef2 = React.createRef();
+
+            showData = ()=>{
+                alert(this.myRef.current.value);
+            }
+
+            showI2Data = ()=>{
+                alert(this.myRef2.current.value);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                        <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                        <input ref={this.myRef2} onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <Demo3/>, document.getElementById('test3')
+        );
+
+        
+    </script>
+</body>
+</html>

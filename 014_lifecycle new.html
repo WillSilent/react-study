@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeCycle - new</title>
+    <!-- 引入react的核心库 -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types_15.8.1.js"></script>
+    <style>
+        .list{
+            width: 200px;
+            height: 150px;
+            background-color: skyblue;
+            overflow: auto;
+        }
+
+        .news{
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="test"></div>
+        <hr/>
+        <div id="demo"></div>
+    </div>
+
+    <script type="text/babel">
+        class Count extends React.Component {
+
+            constructor(props) {
+                console.log('Count --- constructor');
+                super(props);
+                this.state = {count: 0}
+            }
+
+            add = () =>{
+                const {count} = this.state;
+                this.setState({count: count+1})
+            }
+
+            //卸载组件按钮的回调
+            death = () =>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('test2'));
+            }
+
+            force = ()=>{
+                this.forceUpdate();
+            }
+
+            //非常罕见（即state只由props来决定时）
+            //如果返回一个对象，则组件的state无法进行更新
+            static getDerivedStateFromProps(props) {
+                console.log('Count --- getDerivedStateFromProps', props);
+                return null;
+            }
+
+            //控制组件是否进行更新的阀门 --- 返回true则继续走生命周期钩子函数，false则停止了
+            shouldComponentUpdate() {
+                console.log('Count --- shouldComponentUpdate');
+                return true;
+            }
+
+            //组件渲染
+            render() {
+                console.log('Count --- render');
+                const {count} = this.state;
+                return (
+                    <div>
+                        <h2>当前求和为: {count} </h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                        <button onClick={this.force}>不更新状态数据强制更新</button>    
+                    </div>
+                );
+            }
+
+            getSnapshotBeforeUpdate() {
+                console.log('Count --- getSnapshotBeforeUpdate');
+                return "atguigu";
+            }
+
+            //组件完成挂载
+            componentDidMount() {
+                console.log('Count --- componentDidMount');
+            }
+
+            //组件完成更新
+            componentDidUpdate() {
+                console.log('Count --- componentDidUpdate');
+            }
+
+            //组件将要挂载的钩子
+            componentWillUnmount(prevProps, prevState, snapshotValue) {
+                console.log('Count --- componentWillUnmount', prevProps, prevState, snapshotValue);
+            }
+        }
+        ReactDOM.render(
+            <Count count={199}/>, document.getElementById('test')
+        );
+
+        //----------------------------------------------------
+        //getSnapshotBeforeUpdate的一个应用
+        class NewsList extends React.Component{
+            
+            state = {newsArr: []}
+            mylist = React.createRef();
+
+            componentDidMount() {
+                setInterval(() => {
+                    const {newsArr} = this.state;
+                    const news = '新闻' + (newsArr.length + 1);
+                    this.setState({newsArr:[news, ...newsArr]});
+                }, 1000);
+            }
+
+            getSnapshotBeforeUpdate() {
+                return this.mylist.current.scrollHeight;
+            }
+
+            render() {
+                return(
+                    <div className="list" ref={this.mylist}>
+                        {
+                            this.state.newsArr.map((n, index) => {
+                              return <div key = {index} className="news">
+                                    {n}
+                                </div>  
+                            })
+                        }
+                    </div>
+                );
+            }
+
+            componentDidUpdate(prevProps, prevState, snapshotVal) {
+                console.log(snapshotVal);
+                this.mylist.current.scrollTop += this.mylist.current.scrollHeight - snapshotVal;
+            }
+        }
+        ReactDOM.render(
+            <NewsList/>, document.getElementById('demo')
+        );
+        
+    </script>
+</body>
+</html>

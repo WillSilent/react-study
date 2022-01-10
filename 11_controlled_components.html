@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controlled Components</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+    </div>
+
+    <script type="text/babel">
+        class ControllDemo extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {username:'', password:''};
+                this.saveUsername = this.saveUsername.bind(this);
+            }
+
+            //保存用户名到状态中
+            saveUsername(event) {
+                this.setState({username:event.target.value})
+            }
+
+            //保存Password到状态中
+            savaPassword = (event)=>{
+                this.setState({password:event.target.value})
+            }
+
+            handleSubmit = (event)=>{
+                event.preventDefault(); //阻止表单进行提交
+                const {username, password} = this.state;
+                alert(`Username:${username}, Password:${password}`);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <form onSubmit={this.handleSubmit}>
+                            Username&nbsp;<input onChange={this.saveUsername} type="text" /><br/>
+                            Password&nbsp;&nbsp;<input onChange={this.savaPassword} type="text" /><br/>
+                            <button>Login</button>
+                        </form>
+                    </div>
+                );
+            }
+        }
+
+
+        ReactDOM.render(
+            <ControllDemo/>, document.getElementById('test1')
+        );
+        
+    </script>
+</body>
+</html>

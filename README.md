@@ -1,3 +1,5 @@
+# React-study
+
 ## 一、React-Hello World和JSX语法
 
 React是一个将数据渲染为HTML视图的JavaScript库。
@@ -350,11 +352,428 @@ ReactDOM.render(VDOM,document.querySelector('.test'))
 
 ​	4）整个组件在进行调用时，构造器只执行一次，render方法执行1+n次（1是初始化，n是进行页面重绘进行调用），自定义方法回调时会执行
 
+------
+
 ##### 2.props
+
+与`state`不同，`state`是组件自身的状态，而`props`则是外部传入的数据
+
+在使用的时候可以通过 `this.props`来获取值 类式组件的 `props`:
+
+1. 通过在组件标签上传递值，在组件中就可以获取到所传递的值
+2. 在构造器里的`props`参数里可以获取到 `props`
+3. 可以分别设置 `propTypes` 和 `defaultProps` 两个属性来分别操作 `props`的规范和默认值，两者都是直接添加在类式组件的**原型对象**上的（所以需要添加 `static`）
+4. 同时可以通过`...`运算符来简化
+
+```jsx
+<!-- 引入prop-types，用于对组件标签属性进行限制 -->
+<script type="text/javascript" src="./build/prop-types.js"></script>
+<script type="text/babel">
+    class Person extends React.Component{
+        //对props进行类型、必填的限制
+        static propTypes = {
+            name: PropTypes.string.isRequired, //限制name为必填，且为字符串
+            sex: PropTypes.string,
+            age: PropTypes.number,
+            speak: PropTypes.func //也可以传入一个函数
+        }
+        //对缺省值
+        static defaultProps = {
+            sex:'hide',
+            age: 18
+        }
+
+        render() {
+            //props只能进行读取，不能进行修改
+            const {name, sex, age} = this.props;
+            //this.props.age = age+1; //Error:Cannot assign to read only property 'age' of object '#<Object>'
+            return (
+                <ul>
+                    <li>姓名:{name}</li>    
+                    <li>性别:{sex}</li>    
+                    <li>年龄:{age+1}</li>    
+                </ul>
+            );
+        }
+    }
+
+    ReactDOM.render(
+        <Person name="Taylor" age={18} speak={speak} />,document.getElementById('test1')
+    );
+    ReactDOM.render(
+        <Person name="ZJ" sex="Female" age={22} />,document.getElementById('test2')
+    );
+
+    const p = {name:"will", sex:'male', age:10}
+    //语法糖，可以简化代码，直接使用...去展开一个对象
+    ReactDOM.render(
+        <Person {...p} />,document.getElementById('test3')
+    );
+
+    function speak() {
+        alert('speak!!!!');
+    }
+</script>
+```
+
+函数式组件中的使用Props：函数在使用props的时候，是作为参数进行使用的(props)
+
+```jsx
+<script type="text/babel">
+    function Person(props){
+        const {name, sex, age} = props;
+        return (
+            <ul>
+                <li>姓名:{name}</li>    
+                <li>性别:{sex}</li>    
+                <li>年龄:{age+1}</li>    
+            </ul>
+        );
+    }
+
+    //对props进行类型、必填的限制
+    Person.propTypes = {
+        name: PropTypes.string.isRequired, //限制name为必填，且为字符串
+        sex: PropTypes.string,
+        age: PropTypes.number,
+        speak: PropTypes.func //也可以传入一个函数
+    }
+    //对缺省值
+    Person.defaultProps = {
+        sex:'hide',
+        age: 18
+    }
+
+    ReactDOM.render(
+    	<Person name="Taylor" age={18} speak={speak} />,document.getElementById('test1')
+    );
+    function speak() {
+        alert('speak!!!!');
+    }
+</script>
+```
+
+函数组件的 `props`定义:
+
+1. 在组件标签中传递 `props`的值
+2. 组件函数的参数为 `props`
+3. 对 `props`的限制和默认值同样设置在原型对象上
+
+------
 
 ##### 3.refs
 
-#### JS中的高阶函数（有、意思）
+Refs 提供了一种方式，允许我们组件访问 DOM 节点，或在 `render` 方法中创建的 React 的DOM元素。
 
-[优质博客]: https://linjc.blog.csdn.net/article/details/116765732	"JS中的高阶函数"
+> 在我们正常的操作节点时，需要采用DOM API 来查找元素，但是这样违背了 React 的理念，因此有了`refs`
+>
+> 即可以直接使用document.getElementById(xxx) 或 document.getElementByClassName(xxx)
 
+有三种操作`refs`的方法，分别为：
+
+- 字符串形式
+
+  ```jsx
+  //字符串形式的Refs
+  class Demo1 extends React.Component{
+      showData = ()=>{
+          const {input1} = this.refs;
+          alert(input1.value);
+      }
+  
+      showI2Data = ()=>{
+          const {input2} = this.refs;
+          alert(input2.value);
+      }
+  
+      render() {
+          return (
+              <div>
+                  <input ref="input1" type="text" placeholder="点击按钮提示数据" />&nbsp;
+                  <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                  <input ref="input2" onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+              </div>
+          );
+      }
+  }	
+  ```
+
+  这个方法废弃了，由于会产生巨大的效率问题（官网说的）。但是还能用，还很好用hhh~
+
+- 回调形式
+
+  内联函数：组件实例的`ref`属性传递一个回调函数`currentNode => this.input1 = currentNode `（箭头函数简写），这样会在实例的属性中存储对DOM节点的引用，使用时可通过`this.input1`来使用
+
+  class绑定函数：通过自定义函数，直接将当前DOM节点的引用作为参数，挂载到this上，可通过this.input1来直接使用
+
+  ```jsx
+  //回调形式的Refs => 往实例自身上挂载
+  //回调ref中回调执行次数的问题=>
+  class Demo2 extends React.Component{
+  
+  	showData = ()=>{
+          const {input1} = this;
+          alert(input1.value);
+  	}
+  
+      showI2Data = ()=>{
+          const {input2, input3} = this;
+          alert(input2.value)
+      }
+  
+      savaInput3 = (currentNode) =>{
+          this.input3 = currentNode;
+      }
+  
+      render() {
+          return (
+              <div>
+                  {/*
+                         以内联函数的形式定义回调ref
+                           ref={currentNode => this.input1 = currentNode}
+                         每次页面更新重绘时时，这个回调函数会被调用两次，第一次传入的参数null，第二次传入的参数为DOM元素
+                  */}
+                  <input ref={currentNode => this.input1 = currentNode} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                  
+                  {/*
+                         以class的绑定函数的方式来定义回调ref
+                         ref={this.savaInput3}
+                         可以解决上述出现的被执行两次
+                   */}
+                  <input ref={this.savaInput3} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                  
+                  <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                  <input ref={currentNode => this.input2 = currentNode} onBlur={this.showI2Data} 
+                      type="text" placeholder="失去焦点提示数据" />
+              </div>
+          );
+      }
+  }
+  ```
+
+- `createRef`形式（官网推荐写法）
+
+  React 给我们提供了一个相应的API，它会自动的将该 DOM 元素放入实例对象中
+
+  ```jsx
+  class Demo3 extends React.Component{
+      /*
+         React.createRef调用后可以返回一个容器，
+         该容器可以存储ref所标识的节点，该容器时“专人专用”，每个ref都有自己的容器
+      */
+      myRef = React.createRef();
+  	myRef2 = React.createRef();
+  
+      showData = ()=>{
+          alert(this.myRef.current.value);
+      }
+  
+      showI2Data = ()=>{
+          alert(this.myRef2.current.value);
+      }
+  
+      render() {
+          return (
+              <div>
+                  <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                  <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                  <input ref={this.myRef2} onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+              </div>
+          );
+      }
+  }
+  ```
+
+------
+
+#### 事件处理
+
+1. 通过onXxx属性指定事件处理函数(注意大小写)
+   - React使用的是自定义(合成)事件, 而不是使用的原生DOM事件 ---为了更好的兼容性
+   - React中的事件是通过事件委托方式处理的(委托给组件最外层的元素) --- 为了更高效
+2. 通过event.target得到发生事件的DOM元素对象, 可以尽量减少 `refs`的使用
+
+```jsx
+class Demo extends React.Component{
+    showI2Data = (event)=>{
+        alert(event.target.value);
+    }
+    
+    render() {
+        return (
+            <div>
+                <input onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+            </div>
+        );
+    }
+}
+```
+
+> #### tips：当发生事件的事件源和事件要操作的DOM元素为同一个时可以省略掉refs
+>
+> #### 切记不要过度使用refs
+
+------
+
+#### 受控组件和非受控组件（表单元素的组件分类）
+
+页面中的DOM的值被组件中的state控制则为受控组件，反之则为非受控组件
+
+```jsx
+//受控组件
+class ControllDemo extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {username:'', password:''};
+        this.saveUsername = this.saveUsername.bind(this);
+    }
+
+    //保存用户名到状态中
+    saveUsername(event) {
+        this.setState({username:event.target.value})
+    }
+
+    //保存Password到状态中
+    savaPassword = (event)=>{
+        this.setState({password:event.target.value})
+    }
+
+    handleSubmit = (event)=>{
+        event.preventDefault(); //阻止表单进行提交
+        const {username, password} = this.state;
+        alert(`Username:${username}, Password:${password}`);
+    }
+
+    render() {
+        return (
+            <div>
+                <form onSubmit={this.handleSubmit}>
+                    Username&nbsp;<input onChange={this.saveUsername} type="text" /><br/>
+                    Password&nbsp;&nbsp;<input onChange={this.savaPassword} type="text" /><br/>
+                    <button>Login</button>
+                </form>
+            </div>
+        );
+    }
+}
+```
+
+```jsx
+//非受控组件
+class UnControllDemo extends React.Component{
+    handleSubmit = (event)=>{
+        event.preventDefault(); //阻止表单进行提交
+        const {uname, pwd} = this;
+        alert(`Username:${uname.value}, Password:${pwd.value}`);
+    }
+
+    render() {
+        return (
+            <div>
+                <form onSubmit={this.handleSubmit}>
+                    Username&nbsp;<input ref={c => this.uname=c} type="text" /><br/>
+                    Password&nbsp;&nbsp;<input ref={c => this.pwd=c}type="text" /><br/>
+                    <button>Login</button>
+                </form>
+            </div>
+        );
+    }
+}
+```
+
+> #### tips：推荐使用受控组件，可以减少ref的使用
+
+#### JS中的高阶函数（有、意思）：https://linjc.blog.csdn.net/article/details/116765732
+
+如果一个函数满足以下两个条件之一即为高阶函数：1.A函数接收的参数是一个函数 2.A函数的返回值依然是一个函数。
+
+- 函数柯里化
+- 数组的map，reduce，filter
+- AOP切面编程
+- 闭包（这个要去了解）
+- 如何防抖，节流（某种业务场景, setTimeout）
+- Promise
+
+------
+
+## 三、React的生命周期
+
+在 React 中为我们提供了一些生命周期钩子函数，让我们能在 React 执行的重要阶段，在钩子函数中做一些事情。组件从创建到卸载回经历一些特定的阶段。
+
+##### 1.生命周期流程图(旧) v16.8.4之前
+
+<img src="https://raw.githubusercontent.com/WillSilent/myPic/master/img/image-20220109210159170.png" alt="image-20220109210159170" style="zoom: 80%;" />
+
+生命周期的三个阶段（旧）（具体打印数据可以看 013_lifecycle old.html‘’）
+
+1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
+   - constructor()
+   - componentWillMount()
+   - render()
+   - componentDidMount()
+2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
+   - shouldComponentUpdate()
+   - componentWillUpdate()
+   - render()
+   - componentDidUpdate()
+3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
+   - componentWillUnmount()
+
+------
+
+##### 2.生命周期流程图(新) v17.0.1
+
+- <img src="https://raw.githubusercontent.com/WillSilent/myPic/master/img/image-20220109210906426.png" alt="image-20220109210906426" style="zoom:80%;" />
+
+生命周期的三个阶段（新）（具体打印数据可以看 014_lifecycle new.html‘’）
+
+1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
+   - constructor()
+   - getDerivedStateFromProps 
+   - render()：避免在 `render` 中使用 `setState` ，否则会死循环
+   - componentDidMount()：意味着初始化挂载操作已经基本完成，它主要用于组件挂载完成后做某些操作
+2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
+   - getDerivedStateFromProps：在初始化和更新中都会被调用，并且在 `render` 方法之前调用，它返回一个对象用来更新 `state`。类上直接绑定的静态（`static`）方法，它接收两个参数 `props` 和 `state`；并接收`props`用于合并 `state`，生成新的`state`，此后`state`不会再进行更改；若返回`null`，则`state`还是可以进行更改
+   - shouldComponentUpdate()：在组件更新之前调用，可以通过返回值来控制组件是否更新，允许更新返回 `true` ，反之不更新
+   - render()
+   - getSnapshotBeforeUpdate：它可以使组件在 DOM 真正更新之前捕获一些信息（例如滚动位置），此生命周期返回的任何值都会作为参数传递给 `componentDidUpdate()`。如不需要传递任何值，那么请返回 null
+   - componentDidUpdate()：组件在更新完毕后会立即被调用，首次渲染不会调用
+3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
+   - componentWillUnmount():在组件即将被卸载或销毁时进行调用。
+
+> #### tips：
+>
+> render：初始化渲染或更新渲染调用
+>
+> componentDidMount：开启监听, 发送ajax请求
+>
+> componentWillUnmount：做一些收尾工作, 如: 清理定时器
+>
+> 即将废弃的勾子：
+>
+> 1. componentWillMount
+>
+> 2. componentWillReceiveProps
+>
+> 3. componentWillUpdate
+>
+> 现在使用会出现警告，下一个大版本需要加上UNSAFE_前缀才能使用，以后可能会被彻底废弃，不建议使用。
+
+## 四、React中的diff算法（后面有空再去了解，先学其他的先）
+
+diff 算法是 React 提升渲染性能的一种优化算法，在 React 中有着很重要的地位，也不止于 React ，在 Vue 中也有 diff 算法，似乎没有差别。
+
+## 五、React脚手架工程
+
+#### 1.安装React脚手架项目并创建应用
+
+ react提供了一个用于创建react项目的脚手架库: create-react-app。项目的整体技术架构为:  react + webpack + es6 + eslint
+
+- 全局安装：npm i -g create-react-app
+- 切换到想创项目的目录，使用命令：create-react-app hello-react
+- 进入项目文件夹：cd hello-react
+- 启动项目：npm start
+
+#### 2.react脚手架项目结构
+
+​	

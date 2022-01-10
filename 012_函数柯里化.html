@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数柯里化</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+    </div>
+
+    <script type="text/babel">
+        class ControllDemo extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {username:'', password:''};
+            }
+
+            //函数的柯里化
+            //通过函数继续调用返回函数的方式，实现多次接收参数最后统一处理的函数编码形式
+            saveFormData = (dataType)=>{
+                return (event) => {
+                    this.setState({[dataType]: event.target.value})
+                }
+            }
+
+            handleSubmit = (event)=>{
+                event.preventDefault(); //阻止表单进行提交
+                const {username, password} = this.state;
+                alert(`Username:${username}, Password:${password}`);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <form onSubmit={this.handleSubmit}>
+                            Username&nbsp;<input onChange={this.saveFormData('username')} type="text" /><br/>
+                            Password&nbsp;&nbsp;<input onChange={this.saveFormData('password')} type="text" /><br/>
+                            <button>Login</button>
+                        </form>
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <ControllDemo/>, document.getElementById('test1')
+        );
+        
+    </script>
+</body>
+</html>

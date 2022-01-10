@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Handle</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+    </div>
+
+    <script type="text/babel">
+        class Demo extends React.Component{
+            myRef = React.createRef();
+
+            showData = ()=>{
+                alert(this.myRef.current.value);
+            }
+
+            showI2Data = (event)=>{
+                alert(event.target.value);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />&nbsp;
+                        <button onClick={this.showData}>点我提示左侧得数据</button>&nbsp;
+                        <input onBlur={this.showI2Data} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                );
+            }
+        }
+
+
+        ReactDOM.render(
+            <Demo/>, document.getElementById('test1')
+        );
+        
+    </script>
+</body>
+</html>

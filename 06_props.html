@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Props</title>
+    <!-- 引入react的核心库 -->
+    <script type="text/javascript" src="./build/react.development.js"></script>
+    <script type="text/javascript" src="./build/react-dom.development.js"></script>
+    <!-- 两个选一个即可 -->
+    <!-- <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script> -->
+    <script type="text/javascript" src="./build/babel.min.js"></script>
+
+    <!-- 引入prop-types，用于对组件标签属性进行限制 -->
+    <script type="text/javascript" src="./build/prop-types.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="test1"></div>
+        <div id="test2"></div>
+        <div id="test3"></div>
+    </div>
+
+    <script type="text/babel">
+        class Person extends React.Component{
+            //对props进行类型、必填的限制
+            static propTypes = {
+                name: PropTypes.string.isRequired, //限制name为必填，且为字符串
+                sex: PropTypes.string,
+                age: PropTypes.number,
+                speak: PropTypes.func //也可以传入一个函数
+            }
+
+            //对缺省值
+            static defaultProps = {
+                sex:'hide',
+                age: 18
+            }
+
+            render() {
+                //props只能进行读取，不能进行修改
+                const {name, sex, age} = this.props;
+                //this.props.age = age+1; //Error:Cannot assign to read only property 'age' of object '#<Object>'
+                return (
+                    <ul>
+                        <li>姓名:{name}</li>    
+                        <li>性别:{sex}</li>    
+                        <li>年龄:{age+1}</li>    
+                    </ul>
+                );
+            }
+        }
+
+
+        ReactDOM.render(
+            <Person name="Taylor" age={18} speak={speak} />,
+            document.getElementById('test1')
+        );
+
+        ReactDOM.render(
+            <Person name="ZJ" sex="Female" age={22} />,
+            document.getElementById('test2')
+        );
+
+        const p = {name:"will", sex:'male', age:10}
+        //语法糖，可以简化代码，直接使用...去展开一个对象
+        ReactDOM.render(
+            <Person {...p} />,
+            document.getElementById('test3')
+        );
+
+        function speak() {
+            alert('speak!!!!');
+        }
+
+        
+    </script>
+</body>
+</html>
