@@ -776,4 +776,181 @@ diff 算法是 React 提升渲染性能的一种优化算法，在 React 中有�
 
 #### 2.react脚手架项目结构
 
-​	
+```
+hello-react
+├─ .gitignore               // 自动创建本地仓库
+├─ package.json             // 相关配置文件
+├─ public                   // 公共资源
+│  ├─ favicon.ico           // 浏览器顶部的icon图标
+│  ├─ index.html            // 应用的 index.html入口
+│  ├─ logo192.png           // 在 manifest 中使用的logo图
+│  ├─ logo512.png           // 同上
+│  ├─ manifest.json         // 应用加壳的配置文件
+│  └─ robots.txt            // 爬虫给协议文件
+├─ src                      // 源码文件夹
+│  ├─ App.css               // App组件的样式
+│  ├─ App.js                // App组件
+│  ├─ App.test.js           // 用于给APP做测试
+│  ├─ index.css             // 样式
+│  ├─ index.js              // 入口文件
+│  ├─ logo.svg              // logo图
+│  ├─ reportWebVitals.js    // 页面性能分析文件
+│  └─ setupTests.js         // 组件单元测试文件
+└─ yarn.lock (如果使用的是yarn命令的话)
+```
+
+再介绍一下public目录下的 `index.html` 文件中的代码意思。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- 指定浏览器图标的路径，这里直接采用 %PUBLIC_URL% 原因是 webpack 配置好了，它代表的意思就是 public 文件夹 -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- 用于做移动端网页适配 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 用于配置安卓手机浏览器顶部颜色，兼容性不大好 -->
+    <meta name="theme-color" content="#000000" />
+    <!-- 用于描述网站信息 -->
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <!-- 苹果手机触摸版应用图标 -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!-- 应用加壳时的配置文件 -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+#### 3.Todo-List案例
+
+TodoList 案例在前端学习中挺重要的，从原生 JavaScript 的增删查改，到现在 React 的组件通信
+
+（[具体实现参考](https://github.com/linjunc/react-study/blob/main/React%20%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%EF%BC%88%E5%85%AD%EF%BC%89--%20TodoList%20%E6%A1%88%E4%BE%8B.md)，代码参考15_react_staging/02_todo_list）
+
+##### 组件开发时的步骤：
+
+- 拆分组件: 拆分界面,抽取组件
+- 实现静态组件: 使用组件实现静态页面效果(划分组件，以及css)
+- 实现动态组件
+  - 动态显示初始化数据
+    - 数据类型
+    - 数据名称
+    - 保存在哪个组件?
+  - 交互(从绑定事件监听开始)
+
+##### 重点是，不同组件间的进行数据的传递。
+
+![img](https://raw.githubusercontent.com/WillSilent/myPic/master/img/2XGVB2DUX1F3G2P%5DF%7DKSVO3.png)
+
+------
+
+## 六、React-ajax
+
+React应用需集成第三方ajax库（或自己封装），建议使用axios。
+
+#### 前端解决跨域问题：
+
+- ​	给package.json中添加代理："proxy":"http://localhost:5000"（**只能转发到一个地址**，不能配置多个代理）
+
+![image-20220112012303294](https://raw.githubusercontent.com/WillSilent/myPic/master/img/image-20220112012303294.png)
+
+- ​	在src文件下添加setupProxy.js
+
+  ```js
+  const {createProxyMiddleware: proxy} = require('http-proxy-middleware');
+  
+  module.exports = function(app) {
+      app.use(
+          proxy('/api1', { //遇见/api前缀的请求，就会触发该代理配置
+              target:'http://localhost:5000', //请求转发给谁
+              changeOrigin: true, //控制服务器接收到的请求头中Host的值
+              pathRewrite: {'^/api1':''} //重写请求路径
+          }),
+          proxy('/api2', {
+              target:'http://localhost:5001',
+              changeOrigin: true,
+              pathRewrite: {'^/api2':''}
+          })
+      )    
+  }
+  ```
+
+------
+
+#### Github搜索案例：
+
+这个案例主要涉及到了 Axios 发送请求，数据渲染以及一些中间交替效果的实现
+
+[具体实现参考](https://github.com/linjunc/react-study/blob/main/React%20%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%EF%BC%88%E5%85%AB%EF%BC%89--%20GitHub%20%E6%90%9C%E7%B4%A2%E6%A1%88%E4%BE%8B.md)
+
+源代码参考：15_react_staging\04_src_github搜索_axios
+
+------
+
+## 七、消息发布订阅
+
+如何利用消息订阅发布来解决**兄弟组件间的通信**？
+
+在`六`中写的 `Github` 案例中，我们采用的是 `axios` 发送请求来获取数据，同时我们需要将数据从 `Search` 中传入给 `App`，再由 `App` 组件再将数据传递给 `List` 组件，这个过程会显得多此一举。同时我们要将 `state` 状态存放在 `App` 组件当中，但是这些 `state` 状态都是在 `List` 组件中使用的，在 `Search` 组件中做的，只是更新这些数据，那这样也会显得很没有必要，我们完全可以将 `state` 状态存放在 `List` 组件中，但是这样我们又会遇到技术难题，兄弟组件间的数据通信。
+
+`(具体实现参考代码: 15_react_staging\05_src_github搜索_pubsub)`
+
+#### 使用：
+
+##### 1.安装`pubsub-js` : `npm install pubsub-js`
+
+##### 2.在组件中引入：`import PubSub from 'pubsub-js'`
+
+##### 3.订阅消息
+
+我们通过 `subscribe` 来订阅消息，它接收两个参数，第一个参数是消息的名称，第二个是消息成功的回调，回调中也接受两个参数，一个是消息名称，一个是返回的数据
+
+```jsx
+PubSub.subscribe('search',(msg,data)=>{
+  console.log(msg,data);
+})
+```
+
+##### 4.发布消息
+
+我们采用 `publish` 来发布消息，用法如下
+
+```jsx
+PubSub.publish('search',{name:'tom',age:18})
+```
+
+有了这些基础，我们可以完善我们昨天写的 GitHub 案例
+
+将数据的更新通过 `publish` 来传递，例如在发送请求之前，我们需要出现 loading 字样
+
+```jsx
+// 之前的写法
+this.props.updateAppState({ isFirst: false, isLoading: true })
+// 改为发布订阅方式
+PubSub.publish('search',{ isFirst: false, isLoading: true })
+```
+
+这样我们就能成功的在请求之前发送消息，我们只需要在 List 组件中订阅一下这个消息即可，并将返回的数据用于更新状态即可
+
+```jsx
+PubSub.subscribe('search',(msg,stateObj)=>{
+  this.setState(stateObj)
+})
+```
+
+同时上面的代码会返回一个 `token` ，这个就类似于定时器的编号的存在，我们可以通过这个 `token` 值，来取消对应的订阅
+
+##### 5.通过 `unsubscribe` 来取消指定的订阅
+
+```jsx
+PubSub.unsubscribe(this.token)
+```
